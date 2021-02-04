@@ -50,7 +50,10 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 
-uint8_t at_buffer[AT_BUFFER_SIZE];
+uint8_t at_buffer1[AT_BUFFER_SIZE];
+uint8_t at_buffer2[AT_BUFFER_SIZE];
+uint32_t receive_buffer_index = 1;
+uint32_t dispose_buffer_index = 1;
 /* USER CODE END Variables */
 /* Definitions for at_downloadfile */
 osThreadId_t at_downloadfileHandle;
@@ -142,11 +145,19 @@ void at_download_file_task(void *argument)
 		if (!wait_again) {
 			current_index_pointer = get_current_state_index();
 			current_index_pointer->fsm_state->action1();
-			HAL_Delay(50);
+			//HAL_Delay(50);
 			wait_time = current_index_pointer->fsm_state->wait_time;
 		}
-		
+		printf("d:%d,r:%d\n", dispose_buffer_index, receive_buffer_index);
 		wait_result = osThreadFlagsWait(AT_WAIT_FLAG, osFlagsWaitAny, wait_time);
+		/*
+		if (dispose_buffer_index != receive_buffer_index) {
+			wait_result = osThreadFlagsWait(AT_WAIT_FLAG, osFlagsWaitAny, wait_time);
+		} else {
+			(dispose_buffer_index==1) ? (dispose_buffer_index = 2) : (dispose_buffer_index = 1);
+			wait_result = 55;
+		}
+		*/
 		//if time out , retry tyrcnt times.
 		printf("wait result = %d\n", wait_result);
 		if (wait_result == osErrorTimeout) {
@@ -162,9 +173,16 @@ void at_download_file_task(void *argument)
 			continue;
 		}
 		
-		//const char* command = get_at_command_from_buffer((char*)at_buffer);
-		printf("buffer:%s\n", at_buffer);
-		action_result action2_result = current_index_pointer->fsm_state->action2((char*)at_buffer);
+		action_result action2_result;
+		if (dispose_buffer_index == 1) {
+			printf("buffer:%s\n", at_buffer1);
+			action2_result = current_index_pointer->fsm_state->action2((char*)at_buffer1);
+			dispose_buffer_index = 2;
+		} else {
+			printf("buffer:%s\n", at_buffer2);
+			action2_result = current_index_pointer->fsm_state->action2((char*)at_buffer2);
+			dispose_buffer_index = 1;
+		}
 		
 		if (action2_result == ACTION_REPEAT) {
 			continue;

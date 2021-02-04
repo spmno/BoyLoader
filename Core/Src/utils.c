@@ -5,7 +5,6 @@
 #include "usart.h"
 
 #define UPDATE_FLAG_ADDRESS	0x0801F800
-#define UPDATE_FLAG_PAGE	31
 #define UPDATE_FLAG 		0x44
 #define APP_ADDRESS			0x08008000 
 

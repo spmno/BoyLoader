@@ -202,7 +202,7 @@ void DMA1_Channel1_IRQHandler(void)
 void USART3_IRQHandler(void)
 {
   /* USER CODE BEGIN USART3_IRQn 0 */
-  at_download_file_task(NULL);
+  atinfo_callback();
   /* USER CODE END USART3_IRQn 0 */
   /* USER CODE BEGIN USART3_IRQn 1 */
 
