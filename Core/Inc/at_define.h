@@ -8,7 +8,7 @@
 #define AT_RESET_FLAG	4U
 #define AT_WAIT_FLAG	(AT_DATA_FLAG|AT_IDLE_FLAG|AT_RESET_FLAG)
 
-#define AT_BUFFER_SIZE 1200
+#define AT_BUFFER_SIZE 600
 
 typedef enum
 {
@@ -46,6 +46,6 @@ typedef struct
     const at_fsm_state_t *fsm_state; 
 } nbiot_fsm_state_index_t;
 
-void at_download_file_task(void *argument);
+void atinfo_callback(void);
 
 #endif

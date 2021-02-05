@@ -185,6 +185,7 @@ void at_download_file_task(void *argument)
 		}
 		
 		if (action2_result == ACTION_REPEAT) {
+			wait_again = 0;
 			continue;
 		} else if (action2_result == ACTION_SUCCESS) {
 			wait_again = 0;

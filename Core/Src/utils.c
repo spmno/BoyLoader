@@ -58,15 +58,11 @@ ErrorStatus isCorrectCommand(const char* buffer, const char* command)
 	}
 }
 #define TEMP_STRING_LENGTH	32
-ErrorStatus isCorrectCommandFirst(const char* buffer, const char* command)
+char* isCorrectCommandFirst(const char* buffer, const char* command)
 {
 	char temp[TEMP_STRING_LENGTH];
 	strncpy(temp, buffer, TEMP_STRING_LENGTH);
-	if (strstr(temp, command) != NULL) {
-		return SUCCESS;
-	} else {
-		return ERROR;
-	}
+	return strstr(temp, command);
 }
 
 #define LAST_LENGTH	10

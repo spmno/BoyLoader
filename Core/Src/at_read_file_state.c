@@ -58,8 +58,9 @@ static _Bool last_frame_flag = false;
 action_result at_read_file_action2(const char *command_buffer)
 {
 	printf("receive data\n");
-	if (isCorrectCommandFirst(command_buffer, "CONNECT") == SUCCESS) {
-		if (isCorrectCommandFirst(command_buffer, "500") == SUCCESS) {
+	char* connect_position = NULL;
+	if ((connect_position = isCorrectCommandFirst(command_buffer, "CONNECT")) != NULL) {
+		if (isCorrectCommandFirst(connect_position, "500") != NULL) {
 			printf("receive 500\n");
 		} else {
 			printf("receive last\n");
@@ -68,6 +69,7 @@ action_result at_read_file_action2(const char *command_buffer)
 		return ACTION_WAIT_AGAIN;
 	} else if (isCorrectCommandFromLast(command_buffer, "OK") == SUCCESS) {
 		if (!last_frame_flag) {
+			printf("receive ok\n");
 			return ACTION_REPEAT;
 		} else {
 			printf("receive last ok\n");

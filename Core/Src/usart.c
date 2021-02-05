@@ -167,8 +167,26 @@ void MX_USART3_UART_Init(void)
 
   /* USER CODE BEGIN WKUPType USART3 */
   LL_USART_EnableDMAReq_RX(USART3);
-  LL_USART_EnableIT_IDLE(USART3);
-  LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_1);
+  LL_USART_DisableIT_CTS(USART3);
+  LL_USART_DisableIT_RXNE(USART3);
+  LL_USART_DisableIT_IDLE(USART3);
+  LL_USART_DisableIT_RXNE_RXFNE(USART3);
+  LL_USART_DisableIT_TC(USART3);
+  LL_USART_DisableIT_TXE_TXFNF(USART3);
+  LL_USART_DisableIT_PE(USART3);
+  LL_USART_DisableIT_CM(USART3);
+  LL_USART_DisableIT_EOB(USART3);
+  LL_USART_DisableIT_TXFE(USART3);
+  LL_USART_DisableIT_RXFF(USART3);
+  LL_USART_DisableIT_LBD(USART3);
+  LL_USART_DisableIT_TXFT(USART3);
+  LL_USART_DisableIT_TCBGT(USART3);
+  LL_USART_DisableIT_RXFT(USART3);
+  
+  LL_USART_EnableRxTimeout(USART3);
+  LL_USART_EnableIT_RTO(USART3);
+  LL_USART_SetRxTimeout(USART3, 100);
+  LL_USART_DisableOverrunDetect(USART3);
   LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)&USART3->RDR);
   LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)at_buffer1);
   LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, ARRAY_LEN(at_buffer1));
@@ -188,14 +206,11 @@ void MX_USART3_UART_Init(void)
 
 void atinfo_callback()
 {
-	/* Check for IDLE line interrupt */
-    if (LL_USART_IsEnabledIT_IDLE(USART3) && LL_USART_IsActiveFlag_IDLE(USART3)) {
-        LL_USART_ClearFlag_IDLE(USART3);      /* Clear IDLE line flag */
-		if(LL_USART_IsActiveFlag_ORE(USART3)) {
-			printf("------ore-------3\n");
-			LL_USART_ClearFlag_ORE(USART3);
-		}
-		
+
+	/* Check for RTO line interrupt */
+    if (LL_USART_IsActiveFlag_RTO(USART3)) {
+		printf("t:%d\n", xTaskGetTickCountFromISR()); 
+        LL_USART_ClearFlag_RTO(USART3);      /* Clear RTO line flag */
 		rx_data_length = ARRAY_LEN(at_buffer1) - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_1);
 		LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
 		
@@ -203,21 +218,22 @@ void atinfo_callback()
 		if (((rx_data_length >= AT_BUFFER_SIZE) || (rx_data_length < 2) || (at_downloadfileHandle == 0)) == 0) {
 			if (receive_buffer_index == 1) {
 				at_buffer1[rx_data_length]=0;
+				LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)at_buffer2);
+				LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)&USART3->RDR);
+				LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, ARRAY_LEN(at_buffer1));
+				receive_buffer_index = 2;
+				LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
 				printf("u3:%s, at len=%d\n", at_buffer1, rx_data_length);
 			} else {
 				at_buffer2[rx_data_length]=0;
+				LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)at_buffer1);
+				LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)&USART3->RDR);
+				LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, ARRAY_LEN(at_buffer1));
+				receive_buffer_index = 1;
+				LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
 				printf("u3:%s, at len=%d\n", at_buffer2, rx_data_length);
 			}
-			LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)&USART3->RDR);
-			if (receive_buffer_index == 1) {
-				LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)at_buffer2);
-				receive_buffer_index = 2;
-			} else {
-				LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)at_buffer1);
-				receive_buffer_index = 1;
-			}
-			LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, ARRAY_LEN(at_buffer1));
-			LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
+
 			osThreadFlagsSet(at_downloadfileHandle, AT_DATA_FLAG);
 		} else {
 			LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)&USART3->RDR);
@@ -232,9 +248,6 @@ void atinfo_callback()
 			LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
 			printf("handle 0\n");
 		}
-		
-
-
     }
 }
 

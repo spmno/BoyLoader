@@ -7,7 +7,7 @@ _Bool should_update(void);
 
 void jump_to_app(void);
 
-ErrorStatus isCorrectCommandFirst(const char* buffer, const char* command);
+char* isCorrectCommandFirst(const char* buffer, const char* command);
 
 ErrorStatus isCorrectCommandFromLast(const char* buffer, const char* command);
 
