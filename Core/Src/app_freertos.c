@@ -150,14 +150,7 @@ void at_download_file_task(void *argument)
 		}
 		printf("d:%d,r:%d\n", dispose_buffer_index, receive_buffer_index);
 		wait_result = osThreadFlagsWait(AT_WAIT_FLAG, osFlagsWaitAny, wait_time);
-		/*
-		if (dispose_buffer_index != receive_buffer_index) {
-			wait_result = osThreadFlagsWait(AT_WAIT_FLAG, osFlagsWaitAny, wait_time);
-		} else {
-			(dispose_buffer_index==1) ? (dispose_buffer_index = 2) : (dispose_buffer_index = 1);
-			wait_result = 55;
-		}
-		*/
+
 		//if time out , retry tyrcnt times.
 		printf("wait result = %d\n", wait_result);
 		if (wait_result == osErrorTimeout) {
